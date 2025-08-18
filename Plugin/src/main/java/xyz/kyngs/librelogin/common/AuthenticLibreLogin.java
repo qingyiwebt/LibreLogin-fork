@@ -65,6 +65,7 @@ import xyz.kyngs.librelogin.common.mail.AuthenticEMailHandler;
 import xyz.kyngs.librelogin.common.migrate.*;
 import xyz.kyngs.librelogin.common.pipeline.AuthPipeline;
 import xyz.kyngs.librelogin.common.pipeline.DefaultPipelineProvider;
+import xyz.kyngs.librelogin.common.pipeline.MailForcedPipeline;
 import xyz.kyngs.librelogin.common.premium.AuthenticPremiumProvider;
 import xyz.kyngs.librelogin.common.server.AuthenticServerHandler;
 import xyz.kyngs.librelogin.common.totp.AuthenticTOTPProvider;
@@ -126,8 +127,6 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
         platformHandle = providePlatformHandle();
         forbiddenPasswords = new HashSet<>();
         cancelOnExit = HashMultimap.create();
-        pipelineProvider = new DefaultPipelineProvider<>(this);
-        pipelineProvider.registerPipeline(0, new AuthPipeline<>(this));
     }
 
     public Map<Class<?>, DatabaseConnectorRegistration<?, ?>> getDatabaseConnectors() {
@@ -323,6 +322,13 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
 
         authorizationProvider = new AuthenticAuthorizationProvider<>(this);
         commandProvider = new CommandProvider<>(this);
+
+        pipelineProvider = new DefaultPipelineProvider<>(this);
+        pipelineProvider.registerPipeline(0, new AuthPipeline<>(this));
+
+        if (configuration.get(MAIL_FORCED)) {
+            pipelineProvider.registerPipeline(10, new MailForcedPipeline<>(this));
+        }
 
         if (version.dev()) {
             logger.warn("!! YOU ARE RUNNING A DEVELOPMENT BUILD OF LIBRELOGIN !!");

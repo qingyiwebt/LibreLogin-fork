@@ -1,17 +1,23 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package xyz.kyngs.librelogin.common.pipeline;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.title.Title;
 import org.jetbrains.annotations.Nullable;
 import xyz.kyngs.librelogin.api.database.User;
-import xyz.kyngs.librelogin.api.pipeline.LoginPipeline;
+import xyz.kyngs.librelogin.api.pipeline.Pipeline;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.config.ConfigurationKeys;
 
 import java.time.Duration;
 import java.util.HashSet;
 
-public class AuthPipeline<P, S> extends LoginPipeline<P, S> {
+public class AuthPipeline<P, S> extends Pipeline<P, S> {
     private final AuthenticLibreLogin<P, S> context;
     public AuthPipeline(AuthenticLibreLogin<P, S> context) {
         super(context);
@@ -23,6 +29,11 @@ public class AuthPipeline<P, S> extends LoginPipeline<P, S> {
             context.repeat(this::notifyUnauthorized, 0, millis);
         }
         context.repeat(this::broadcastActionBars, 0, 1000);
+    }
+
+    @Override
+    public String getPipelineId() {
+        return "auth";
     }
 
     @Override

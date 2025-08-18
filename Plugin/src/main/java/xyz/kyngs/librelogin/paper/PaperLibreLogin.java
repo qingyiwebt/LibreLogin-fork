@@ -19,9 +19,11 @@ import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import xyz.kyngs.librelogin.api.Logger;
 import xyz.kyngs.librelogin.api.database.User;
 import xyz.kyngs.librelogin.api.event.exception.EventCancelledException;
+import xyz.kyngs.librelogin.api.pipeline.Pipeline;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.SLF4JLogger;
 import xyz.kyngs.librelogin.common.image.AuthenticImageProjector;
@@ -51,6 +53,41 @@ public class PaperLibreLogin extends AuthenticLibreLogin<Player, World> {
                 .bStats(false);
 
         PacketEvents.getAPI().load();
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(Player player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(Player player, @Nullable User user) {
+                try {
+                    var location = listeners.getSpawnLocationCache().getIfPresent(player);
+                    if (location == null) {
+                        var world = getServerHandler().chooseLobbyServer(user, player, true, false);
+                        if (world == null) {
+                            getPlatformHandle().kick(player, getMessages().getMessage("kick-no-lobby"));
+                            return;
+                        }
+
+                        location = world.getSpawnLocation();
+                    } else {
+                        listeners.getSpawnLocationCache().invalidate(player);
+                    }
+
+                    var finalLocation = location;
+                    PaperUtil.runSyncAndWait(() -> player.teleportAsync(finalLocation), PaperLibreLogin.this);
+
+                } catch (EventCancelledException ignored) {
+                }
+            }
+        });
     }
 
     public PaperBootstrap getBootstrap() {

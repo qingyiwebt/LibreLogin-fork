@@ -26,6 +26,7 @@ import xyz.kyngs.librelogin.api.PlatformHandle;
 import xyz.kyngs.librelogin.api.database.User;
 import xyz.kyngs.librelogin.api.event.exception.EventCancelledException;
 import xyz.kyngs.librelogin.api.integration.LimboIntegration;
+import xyz.kyngs.librelogin.api.pipeline.Pipeline;
 import xyz.kyngs.librelogin.bungeecord.integration.BungeeNanoLimboIntegration;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.config.ConfigurationKeys;
@@ -52,6 +53,29 @@ public class BungeeCordLibreLogin extends AuthenticLibreLogin<ProxiedPlayer, Ser
 
     public BungeeCordLibreLogin(BungeeCordBootstrap bootstrap) {
         this.bootstrap = bootstrap;
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(ProxiedPlayer player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(ProxiedPlayer player, @Nullable User user) {
+                try {
+                    var server = getServerHandler().chooseLobbyServer(user, player, true, false);
+
+                    if (server != null) {
+                        player.connect(server);
+                    } else player.disconnect(serializer.serialize(getMessages().getMessage("kick-no-lobby")));
+                } catch (EventCancelledException ignored) {}
+            }
+        });
     }
 
     protected BungeeCordBootstrap getBootstrap() {

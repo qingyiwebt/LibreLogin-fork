@@ -1,8 +1,14 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package xyz.kyngs.librelogin.common.pipeline;
 
 import org.jetbrains.annotations.Nullable;
 import xyz.kyngs.librelogin.api.database.User;
-import xyz.kyngs.librelogin.api.pipeline.LoginPipeline;
+import xyz.kyngs.librelogin.api.pipeline.Pipeline;
 import xyz.kyngs.librelogin.api.pipeline.PipelineProvider;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 
@@ -13,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultPipelineProvider<P, S> implements PipelineProvider<P, S> {
     private final Map<P, Integer> pipelineStatus;
-    private final NavigableMap<Integer, LoginPipeline<P, S>> pipelines;
+    private final NavigableMap<Integer, Pipeline<P, S>> pipelines;
     private final AuthenticLibreLogin<P, S> context;
 
     public DefaultPipelineProvider(AuthenticLibreLogin<P, S> context) {
@@ -23,7 +29,7 @@ public class DefaultPipelineProvider<P, S> implements PipelineProvider<P, S> {
     }
 
     @Override
-    public void registerPipeline(int priority, LoginPipeline<P, S> pipeline) {
+    public void registerPipeline(int priority, Pipeline<P, S> pipeline) {
         pipelines.put(priority, pipeline);
     }
 
@@ -45,6 +51,16 @@ public class DefaultPipelineProvider<P, S> implements PipelineProvider<P, S> {
             var user = getUser(player);
             pipeline.exit(player, user);
         }
+    }
+
+    @Override
+    public Pipeline<P, S> getPipeline(P player) {
+        var pipelinePriority = pipelineStatus.get(player);
+        if (pipelinePriority == null) {
+            return null;
+        }
+
+        return pipelines.get(pipelinePriority);
     }
 
     @Nullable

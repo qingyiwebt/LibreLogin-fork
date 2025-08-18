@@ -43,6 +43,11 @@ public class VerifyEMailCommand<P> extends EMailCommand<P> {
             getDatabaseProvider().updateUser(user);
 
             sender.sendMessage(getMessage("info-mail-verified"));
+
+            var pipeline= getPipelineProvider().getPipeline(player);
+            if (pipeline != null && pipeline.getPipelineId().equals("mail-forced")) {
+                pipeline.next(player);
+            }
         });
     }
 }

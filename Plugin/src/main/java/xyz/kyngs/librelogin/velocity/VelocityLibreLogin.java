@@ -27,6 +27,7 @@ import xyz.kyngs.librelogin.api.PlatformHandle;
 import xyz.kyngs.librelogin.api.database.User;
 import xyz.kyngs.librelogin.api.event.exception.EventCancelledException;
 import xyz.kyngs.librelogin.api.integration.LimboIntegration;
+import xyz.kyngs.librelogin.api.pipeline.Pipeline;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.SLF4JLogger;
 import xyz.kyngs.librelogin.common.config.ConfigurationKeys;
@@ -34,7 +35,6 @@ import xyz.kyngs.librelogin.common.image.AuthenticImageProjector;
 import xyz.kyngs.librelogin.common.image.protocolize.ProtocolizeImageProjector;
 import xyz.kyngs.librelogin.common.util.CancellableTask;
 import xyz.kyngs.librelogin.velocity.integration.VelocityNanoLimboIntegration;
-import xyz.kyngs.librelogin.velocity.pipeline.FinishPipeline;
 
 import java.io.File;
 import java.io.InputStream;
@@ -66,7 +66,36 @@ public class VelocityLibreLogin extends AuthenticLibreLogin<Player, RegisteredSe
     public VelocityLibreLogin(VelocityBootstrap bootstrap) {
         this.bootstrap = bootstrap;
 
-        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new FinishPipeline(this));
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(Player player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(Player player, @Nullable User user) {
+                try {
+                    var lobby = getServerHandler().chooseLobbyServer(user, player, true, false);
+                    if (lobby == null) {
+                        player.disconnect(getMessages().getMessage("kick-no-lobby"));
+                        return;
+                    }
+                    player.createConnectionRequest(lobby).connect().whenComplete((result, throwable) -> {
+                        if (player.getCurrentServer().isEmpty()) return;
+                        if (player.getCurrentServer().get().getServerInfo().getName().equals(result.getAttemptedConnection().getServerInfo().getName()))
+                            return;
+                        if (throwable != null || !result.isSuccessful())
+                            player.disconnect(Component.text("Unable to connect"));
+                    });
+                } catch (EventCancelledException ignored) {
+                }
+            }
+        });
     }
 
     @Override

@@ -342,6 +342,14 @@ public class ConfigurationKeys {
             "Should we enable the email password recovery feature?",
             ConfigurateHelper::getBoolean
     );
+
+    public static final ConfigurationKey<Boolean> MAIL_FORCED = new ConfigurationKey<>(
+            "mail.forced",
+            false,
+            "Must a player bind email before gaming?",
+            ConfigurateHelper::getBoolean
+    );
+
     public static final ConfigurationKey<String> MAIL_HOST = new ConfigurationKey<>(
             "mail.host",
             "smtp.gmail.com",
