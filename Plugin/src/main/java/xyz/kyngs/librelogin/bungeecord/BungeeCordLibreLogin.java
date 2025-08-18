@@ -53,29 +53,6 @@ public class BungeeCordLibreLogin extends AuthenticLibreLogin<ProxiedPlayer, Ser
 
     public BungeeCordLibreLogin(BungeeCordBootstrap bootstrap) {
         this.bootstrap = bootstrap;
-
-        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
-            @Override
-            public String getPipelineId() {
-                return "finish";
-            }
-
-            @Override
-            public boolean hit(ProxiedPlayer player, @Nullable User user) {
-                return true;
-            }
-
-            @Override
-            public void execute(ProxiedPlayer player, @Nullable User user) {
-                try {
-                    var server = getServerHandler().chooseLobbyServer(user, player, true, false);
-
-                    if (server != null) {
-                        player.connect(server);
-                    } else player.disconnect(serializer.serialize(getMessages().getMessage("kick-no-lobby")));
-                } catch (EventCancelledException ignored) {}
-            }
-        });
     }
 
     protected BungeeCordBootstrap getBootstrap() {
@@ -106,6 +83,29 @@ public class BungeeCordLibreLogin extends AuthenticLibreLogin<ProxiedPlayer, Ser
 
         bootstrap.getProxy().getPluginManager().registerListener(bootstrap, new Blockers(this));
         bootstrap.getProxy().getPluginManager().registerListener(bootstrap, new BungeeCordListener(this));
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(ProxiedPlayer player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(ProxiedPlayer player, @Nullable User user) {
+                try {
+                    var server = getServerHandler().chooseLobbyServer(user, player, true, false);
+
+                    if (server != null) {
+                        player.connect(server);
+                    } else player.disconnect(serializer.serialize(getMessages().getMessage("kick-no-lobby")));
+                } catch (EventCancelledException ignored) {}
+            }
+        });
     }
 
     @Override

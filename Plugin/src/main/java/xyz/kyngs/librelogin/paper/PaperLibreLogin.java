@@ -53,41 +53,6 @@ public class PaperLibreLogin extends AuthenticLibreLogin<Player, World> {
                 .bStats(false);
 
         PacketEvents.getAPI().load();
-
-        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
-            @Override
-            public String getPipelineId() {
-                return "finish";
-            }
-
-            @Override
-            public boolean hit(Player player, @Nullable User user) {
-                return true;
-            }
-
-            @Override
-            public void execute(Player player, @Nullable User user) {
-                try {
-                    var location = listeners.getSpawnLocationCache().getIfPresent(player);
-                    if (location == null) {
-                        var world = getServerHandler().chooseLobbyServer(user, player, true, false);
-                        if (world == null) {
-                            getPlatformHandle().kick(player, getMessages().getMessage("kick-no-lobby"));
-                            return;
-                        }
-
-                        location = world.getSpawnLocation();
-                    } else {
-                        listeners.getSpawnLocationCache().invalidate(player);
-                    }
-
-                    var finalLocation = location;
-                    PaperUtil.runSyncAndWait(() -> player.teleportAsync(finalLocation), PaperLibreLogin.this);
-
-                } catch (EventCancelledException ignored) {
-                }
-            }
-        });
     }
 
     public PaperBootstrap getBootstrap() {
@@ -182,6 +147,41 @@ public class PaperLibreLogin extends AuthenticLibreLogin<Player, World> {
         } catch (ShutdownException e) {
             return;
         }
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(Player player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(Player player, @Nullable User user) {
+                try {
+                    var location = listeners.getSpawnLocationCache().getIfPresent(player);
+                    if (location == null) {
+                        var world = getServerHandler().chooseLobbyServer(user, player, true, false);
+                        if (world == null) {
+                            getPlatformHandle().kick(player, getMessages().getMessage("kick-no-lobby"));
+                            return;
+                        }
+
+                        location = world.getSpawnLocation();
+                    } else {
+                        listeners.getSpawnLocationCache().invalidate(player);
+                    }
+
+                    var finalLocation = location;
+                    PaperUtil.runSyncAndWait(() -> player.teleportAsync(finalLocation), PaperLibreLogin.this);
+
+                } catch (EventCancelledException ignored) {
+                }
+            }
+        });
 
         var provider = getEventProvider();
 

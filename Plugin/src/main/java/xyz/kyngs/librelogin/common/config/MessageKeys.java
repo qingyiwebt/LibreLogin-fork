@@ -664,6 +664,13 @@ public class MessageKeys {
             ConfigurateHelper::getString
     );
 
+    public static final ConfigurationKey<String> INFO_MAIL_BINDING = new ConfigurationKey<>(
+            "info-email-binding",
+            "Please bind your email via /setemail <email> <password>",
+            "This message is displayed when a user is required to bind email",
+            ConfigurateHelper::getString
+    );
+
     public static final ConfigurationKey<String> INFO_MAIL_VERIFIED = new ConfigurationKey<>(
             "info-mail-verified",
             "Email verified! You can now reset your password if you forget it.",

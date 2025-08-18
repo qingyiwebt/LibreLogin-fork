@@ -65,37 +65,6 @@ public class VelocityLibreLogin extends AuthenticLibreLogin<Player, RegisteredSe
 
     public VelocityLibreLogin(VelocityBootstrap bootstrap) {
         this.bootstrap = bootstrap;
-
-        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
-            @Override
-            public String getPipelineId() {
-                return "finish";
-            }
-
-            @Override
-            public boolean hit(Player player, @Nullable User user) {
-                return true;
-            }
-
-            @Override
-            public void execute(Player player, @Nullable User user) {
-                try {
-                    var lobby = getServerHandler().chooseLobbyServer(user, player, true, false);
-                    if (lobby == null) {
-                        player.disconnect(getMessages().getMessage("kick-no-lobby"));
-                        return;
-                    }
-                    player.createConnectionRequest(lobby).connect().whenComplete((result, throwable) -> {
-                        if (player.getCurrentServer().isEmpty()) return;
-                        if (player.getCurrentServer().get().getServerInfo().getName().equals(result.getAttemptedConnection().getServerInfo().getName()))
-                            return;
-                        if (throwable != null || !result.isSuccessful())
-                            player.disconnect(Component.text("Unable to connect"));
-                    });
-                } catch (EventCancelledException ignored) {
-                }
-            }
-        });
     }
 
     @Override
@@ -195,6 +164,38 @@ public class VelocityLibreLogin extends AuthenticLibreLogin<Player, RegisteredSe
             redisBungee = new VelocityRedisBungeeIntegration();
         }
         super.enable();
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new Pipeline<>(this) {
+            @Override
+            public String getPipelineId() {
+                return "finish";
+            }
+
+            @Override
+            public boolean hit(Player player, @Nullable User user) {
+                return true;
+            }
+
+            @Override
+            public void execute(Player player, @Nullable User user) {
+                try {
+                    var lobby = getServerHandler().chooseLobbyServer(user, player, true, false);
+                    if (lobby == null) {
+                        player.disconnect(getMessages().getMessage("kick-no-lobby"));
+                        return;
+                    }
+                    player.createConnectionRequest(lobby).connect().whenComplete((result, throwable) -> {
+                        if (player.getCurrentServer().isEmpty()) return;
+                        if (player.getCurrentServer().get().getServerInfo().getName().equals(result.getAttemptedConnection().getServerInfo().getName()))
+                            return;
+                        if (throwable != null || !result.isSuccessful())
+                            player.disconnect(Component.text("Unable to connect"));
+                    });
+                } catch (EventCancelledException ignored) {
+                }
+            }
+        });
+
         getLogger().info("LibreLogin version " + getVersion() + " enabled!");
     }
 

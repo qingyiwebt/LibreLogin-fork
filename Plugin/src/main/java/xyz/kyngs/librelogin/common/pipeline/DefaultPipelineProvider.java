@@ -40,7 +40,7 @@ public class DefaultPipelineProvider<P, S> implements PipelineProvider<P, S> {
 
     @Override
     public void beginTracking(P player) {
-        pipelineStatus.put(player, 0);
+        this.jump(player, getUser(player), pipelines.firstKey());
     }
 
     @Override
