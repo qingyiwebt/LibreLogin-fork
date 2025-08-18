@@ -72,7 +72,7 @@ public class LoginCommand<P> extends AuthorizationCommand<P> {
             }
 
             sender.sendMessage(getMessage("info-logged-in"));
-            getAuthorizationProvider().authorize(user, player, AuthenticatedEvent.AuthenticationReason.LOGIN);
+            getPipelineProvider().next(player);
         });
     }
 

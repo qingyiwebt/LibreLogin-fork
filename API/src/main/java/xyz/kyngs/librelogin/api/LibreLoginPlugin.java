@@ -17,6 +17,7 @@ import xyz.kyngs.librelogin.api.event.EventTypes;
 import xyz.kyngs.librelogin.api.image.ImageProjector;
 import xyz.kyngs.librelogin.api.integration.LimboIntegration;
 import xyz.kyngs.librelogin.api.mail.EmailHandler;
+import xyz.kyngs.librelogin.api.pipeline.PipelineProvider;
 import xyz.kyngs.librelogin.api.premium.PremiumProvider;
 import xyz.kyngs.librelogin.api.server.ServerHandler;
 import xyz.kyngs.librelogin.api.totp.TOTPProvider;
@@ -51,6 +52,12 @@ public interface LibreLoginPlugin<P, S> {
      * @return The logger
      */
     Logger getLogger();
+
+    /**
+     * Get the pipeline provider
+     * @return The provider
+     */
+    PipelineProvider<P, S> getPipelineProvider();
 
     /**
      * Gets a plugin resource as an input stream.

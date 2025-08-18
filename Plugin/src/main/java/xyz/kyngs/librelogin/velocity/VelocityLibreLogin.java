@@ -34,6 +34,7 @@ import xyz.kyngs.librelogin.common.image.AuthenticImageProjector;
 import xyz.kyngs.librelogin.common.image.protocolize.ProtocolizeImageProjector;
 import xyz.kyngs.librelogin.common.util.CancellableTask;
 import xyz.kyngs.librelogin.velocity.integration.VelocityNanoLimboIntegration;
+import xyz.kyngs.librelogin.velocity.pipeline.FinishPipeline;
 
 import java.io.File;
 import java.io.InputStream;
@@ -64,6 +65,8 @@ public class VelocityLibreLogin extends AuthenticLibreLogin<Player, RegisteredSe
 
     public VelocityLibreLogin(VelocityBootstrap bootstrap) {
         this.bootstrap = bootstrap;
+
+        getPipelineProvider().registerPipeline(Integer.MAX_VALUE, new FinishPipeline(this));
     }
 
     @Override
@@ -97,29 +100,6 @@ public class VelocityLibreLogin extends AuthenticLibreLogin<Player, RegisteredSe
     @Override
     public Player getPlayerFromIssuer(CommandIssuer issuer) {
         return ((VelocityCommandIssuer) issuer).getPlayer();
-    }
-
-    @Override
-    public void authorize(Player player, User user, Audience audience) {
-        try {
-            var lobby = getServerHandler().chooseLobbyServer(user, player, true, false);
-            if (lobby == null) {
-                player.disconnect(getMessages().getMessage("kick-no-lobby"));
-                return;
-            }
-            player
-                    .createConnectionRequest(
-                            lobby
-                    )
-                    .connect()
-                    .whenComplete((result, throwable) -> {
-                        if (player.getCurrentServer().isEmpty()) return;
-                        if (player.getCurrentServer().get().getServerInfo().getName().equals(result.getAttemptedConnection().getServerInfo().getName()))
-                            return;
-                        if (throwable != null || !result.isSuccessful())
-                            player.disconnect(Component.text("Unable to connect"));
-                    });
-        } catch (EventCancelledException ignored) {}
     }
 
     @Override

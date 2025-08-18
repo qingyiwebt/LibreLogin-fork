@@ -18,6 +18,7 @@ import xyz.kyngs.librelogin.api.database.ReadWriteDatabaseProvider;
 import xyz.kyngs.librelogin.api.database.User;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.authorization.AuthenticAuthorizationProvider;
+import xyz.kyngs.librelogin.common.pipeline.DefaultPipelineProvider;
 import xyz.kyngs.librelogin.common.util.GeneralUtil;
 
 import java.util.concurrent.CompletionStage;
@@ -48,6 +49,10 @@ public class Command<P> extends BaseCommand {
 
     protected AuthenticAuthorizationProvider<P, ?> getAuthorizationProvider() {
         return plugin.getAuthorizationProvider();
+    }
+
+    protected DefaultPipelineProvider<P, ?> getPipelineProvider() {
+        return plugin.getPipelineProvider();
     }
 
     protected void checkAuthorized(P player) {

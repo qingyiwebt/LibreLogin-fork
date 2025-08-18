@@ -406,7 +406,6 @@ public class LibreLoginCommand<P> extends StaffCommand<P> {
             audience.sendMessage(getMessage("info-logging-in"));
 
             plugin.getAuthorizationProvider().authorize(user, target, AuthenticatedEvent.AuthenticationReason.LOGIN);
-
             audience.sendMessage(getMessage("info-logged-in"));
         });
     }

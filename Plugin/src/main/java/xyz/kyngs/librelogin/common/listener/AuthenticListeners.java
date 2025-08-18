@@ -56,19 +56,18 @@ public class AuthenticListeners<Plugin extends AuthenticLibreLogin<P, S>, P, S> 
             plugin.delay(() -> plugin.getPlatformHandle().getAudienceForPlayer(player).sendMessage(plugin.getMessages().getMessage("info-session-logged-in")), 500);
             plugin.getEventProvider().fire(plugin.getEventTypes().authenticated, new AuthenticAuthenticatedEvent<>(user, player, plugin, AuthenticatedEvent.AuthenticationReason.SESSION));
         } else {
-            plugin.getAuthorizationProvider().startTracking(user, player);
+            plugin.getPipelineProvider().beginTracking(player);
         }
 
         user.setLastSeen(Timestamp.valueOf(LocalDateTime.now()));
 
         var finalUser = user;
         plugin.delay(() -> plugin.getDatabaseProvider().updateUser(finalUser), 0);
-
     }
 
     protected void onPlayerDisconnect(P player) {
         plugin.onExit(player);
-        plugin.getAuthorizationProvider().onExit(player);
+        plugin.getPipelineProvider().cancelTracking(player);
     }
 
     protected PreLoginResult onPreLogin(String username, InetAddress address) {

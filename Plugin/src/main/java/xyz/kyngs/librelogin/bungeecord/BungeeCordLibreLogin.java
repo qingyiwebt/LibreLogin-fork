@@ -125,17 +125,6 @@ public class BungeeCordLibreLogin extends AuthenticLibreLogin<ProxiedPlayer, Ser
     }
 
     @Override
-    public void authorize(ProxiedPlayer player, User user, Audience audience) {
-        try {
-            var server = getServerHandler().chooseLobbyServer(user, player, true, false);
-
-            if (server != null) {
-                player.connect(server);
-            } else player.disconnect(serializer.serialize(getMessages().getMessage("kick-no-lobby")));
-        } catch (EventCancelledException ignored) {}
-    }
-
-    @Override
     public CancellableTask delay(Runnable runnable, long delayInMillis) {
         var task = bootstrap.getProxy().getScheduler().schedule(bootstrap, runnable, delayInMillis, TimeUnit.MILLISECONDS);
         return task::cancel;

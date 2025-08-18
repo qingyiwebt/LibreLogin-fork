@@ -63,6 +63,8 @@ import xyz.kyngs.librelogin.common.log.Log4JFilter;
 import xyz.kyngs.librelogin.common.log.SimpleLogFilter;
 import xyz.kyngs.librelogin.common.mail.AuthenticEMailHandler;
 import xyz.kyngs.librelogin.common.migrate.*;
+import xyz.kyngs.librelogin.common.pipeline.AuthPipeline;
+import xyz.kyngs.librelogin.common.pipeline.DefaultPipelineProvider;
 import xyz.kyngs.librelogin.common.premium.AuthenticPremiumProvider;
 import xyz.kyngs.librelogin.common.server.AuthenticServerHandler;
 import xyz.kyngs.librelogin.common.totp.AuthenticTOTPProvider;
@@ -115,6 +117,7 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
     private DatabaseConnector<?, ?> databaseConnector;
     private AuthenticEMailHandler eMailHandler;
     private LoginTryListener<P, S> loginTryListener;
+    private DefaultPipelineProvider<P, S> pipelineProvider;
 
     protected AuthenticLibreLogin() {
         cryptoProviders = new ConcurrentHashMap<>();
@@ -123,6 +126,8 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
         platformHandle = providePlatformHandle();
         forbiddenPasswords = new HashSet<>();
         cancelOnExit = HashMultimap.create();
+        pipelineProvider = new DefaultPipelineProvider<>(this);
+        pipelineProvider.registerPipeline(0, new AuthPipeline<>(this));
     }
 
     public Map<Class<?>, DatabaseConnectorRegistration<?, ?>> getDatabaseConnectors() {
@@ -132,6 +137,11 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
     @Override
     public <E extends Exception, C extends DatabaseConnector<E, ?>> void registerDatabaseConnector(Class<?> clazz, ThrowableFunction<String, C, E> factory, String id) {
         registerDatabaseConnector(new DatabaseConnectorRegistration<>(factory, null, id), clazz);
+    }
+
+    @Override
+    public DefaultPipelineProvider<P, S> getPipelineProvider() {
+        return pipelineProvider;
     }
 
     @Override
@@ -722,8 +732,6 @@ public abstract class AuthenticLibreLogin<P, S> implements LibreLoginPlugin<P, S
     public abstract CommandManager<?, ?, ?, ?, ?, ?> provideManager();
 
     public abstract P getPlayerFromIssuer(CommandIssuer issuer);
-
-    public abstract void authorize(P player, User user, Audience audience);
 
     public abstract CancellableTask delay(Runnable runnable, long delayInMillis);
 
