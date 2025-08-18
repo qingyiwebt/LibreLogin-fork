@@ -8,7 +8,6 @@ package xyz.kyngs.librelogin.common.authorization;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import xyz.kyngs.librelogin.api.authorization.AuthorizationProvider;
 import xyz.kyngs.librelogin.api.database.User;
@@ -16,12 +15,10 @@ import xyz.kyngs.librelogin.api.event.events.AuthenticatedEvent;
 import xyz.kyngs.librelogin.api.totp.TOTPData;
 import xyz.kyngs.librelogin.common.AuthenticHandler;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
-import xyz.kyngs.librelogin.common.config.ConfigurationKeys;
 import xyz.kyngs.librelogin.common.event.events.AuthenticAuthenticatedEvent;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,6 +98,10 @@ public class AuthenticAuthorizationProvider<P, S> extends AuthenticHandler<P, S>
     }
 
     public void stopTracking(P player) {
+        unauthorized.remove(player);
+    }
+
+    public void clearUserState(P player) {
         awaiting2FA.remove(player);
         emailConfirmCache.invalidate(platformHandle.getUUIDForPlayer(player));
         passwordResetCache.invalidate(platformHandle.getUUIDForPlayer(player));

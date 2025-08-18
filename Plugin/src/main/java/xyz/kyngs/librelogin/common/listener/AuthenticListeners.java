@@ -68,6 +68,7 @@ public class AuthenticListeners<Plugin extends AuthenticLibreLogin<P, S>, P, S> 
     protected void onPlayerDisconnect(P player) {
         plugin.onExit(player);
         plugin.getPipelineProvider().cancelTracking(player);
+        plugin.getAuthorizationProvider().clearUserState(player);
     }
 
     protected PreLoginResult onPreLogin(String username, InetAddress address) {
