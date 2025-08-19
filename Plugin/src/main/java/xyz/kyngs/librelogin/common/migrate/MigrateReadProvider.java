@@ -34,4 +34,8 @@ public abstract class MigrateReadProvider implements ReadDatabaseProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Integer countEmail(String email) {
+        throw new UnsupportedOperationException();
+    }
 }
