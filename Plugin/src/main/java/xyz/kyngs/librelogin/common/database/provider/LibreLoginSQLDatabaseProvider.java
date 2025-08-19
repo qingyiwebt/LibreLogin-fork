@@ -155,7 +155,11 @@ public abstract class LibreLoginSQLDatabaseProvider extends AuthenticDatabasePro
             ps.setString(1, email);
 
             var rs = ps.executeQuery();
-            return rs.getInt(1);
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return 0;
+            }
         });
     }
 
