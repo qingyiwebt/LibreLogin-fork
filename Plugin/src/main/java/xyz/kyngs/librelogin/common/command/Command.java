@@ -18,6 +18,7 @@ import xyz.kyngs.librelogin.api.database.ReadWriteDatabaseProvider;
 import xyz.kyngs.librelogin.api.database.User;
 import xyz.kyngs.librelogin.common.AuthenticLibreLogin;
 import xyz.kyngs.librelogin.common.authorization.AuthenticAuthorizationProvider;
+import xyz.kyngs.librelogin.common.config.HoconPluginConfiguration;
 import xyz.kyngs.librelogin.common.pipeline.DefaultPipelineProvider;
 import xyz.kyngs.librelogin.common.util.GeneralUtil;
 
@@ -53,6 +54,10 @@ public class Command<P> extends BaseCommand {
 
     protected DefaultPipelineProvider<P, ?> getPipelineProvider() {
         return plugin.getPipelineProvider();
+    }
+
+    protected HoconPluginConfiguration getConfiguration() {
+        return plugin.getConfiguration();
     }
 
     protected void checkAuthorized(P player) {

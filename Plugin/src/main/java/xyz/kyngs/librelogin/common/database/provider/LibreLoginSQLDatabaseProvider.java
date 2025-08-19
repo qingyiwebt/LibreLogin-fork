@@ -148,6 +148,18 @@ public abstract class LibreLoginSQLDatabaseProvider extends AuthenticDatabasePro
     }
 
     @Override
+    public Integer countEmail(String email) {
+        plugin.reportMainThread();
+        return connector.runQuery(connection -> {
+            var ps = connection.prepareStatement("SELECT COUNT(email) FROM librepremium_data WHERE email = ?");
+            ps.setString(1, email);
+
+            var rs = ps.executeQuery();
+            return rs.getInt(1);
+        });
+    }
+
+    @Override
     public void insertUser(User user) {
         plugin.reportMainThread();
         connector.runQuery(connection -> {

@@ -55,4 +55,11 @@ public interface ReadDatabaseProvider {
      */
     Collection<User> getByIP(String ip);
 
+    /**
+     * Get the count of the users bound to this email
+     *
+     * @param email The email to check
+     * @return Count of the users bound to this email
+     */
+    Integer countEmail(String email);
 }

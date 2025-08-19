@@ -170,6 +170,13 @@ public class MessageKeys {
             ConfigurateHelper::getString
     );
 
+    public static final ConfigurationKey<String> EMAIL_MAXIMUM_REACHED = new ConfigurationKey<>(
+            "error-mail-reach-maximum",
+            "This email has bound too many users",
+            "The message shown when the email reached the max user count the email can bind (mail.max-users)",
+            ConfigurateHelper::getString
+    );
+
     public static final ConfigurationKey<String> ERROR_ALREADY_AUTHORIZED = new ConfigurationKey<>(
             "error-already-authorized",
             "You are already authorized!",

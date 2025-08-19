@@ -350,6 +350,13 @@ public class ConfigurationKeys {
             ConfigurateHelper::getBoolean
     );
 
+    public static final ConfigurationKey<Integer> MAIL_MAX_USERS = new ConfigurationKey<>(
+            "mail.max-users",
+            10,
+            "How many users can a email bind to?",
+            ConfigurateHelper::getInt
+    );
+
     public static final ConfigurationKey<String> MAIL_HOST = new ConfigurationKey<>(
             "mail.host",
             "smtp.gmail.com",

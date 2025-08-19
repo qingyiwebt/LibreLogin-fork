@@ -35,6 +35,7 @@ public class SetEMailCommand<P> extends EMailCommand<P> {
     @CommandCompletion("%autocomplete.set-email")
     public CompletionStage<Void> onSetMail(Audience sender, P player, UUID uuid, String mail, @Single String password) {
         return runAsync(() -> {
+            // check password
             var user = getUser(player);
 
             var hashed = user.getHashedPassword();
@@ -47,10 +48,19 @@ public class SetEMailCommand<P> extends EMailCommand<P> {
                 throw new InvalidCommandArgument(getMessage("error-password-wrong"));
             }
 
+            // rate limit
             if (limiter.tryAndLimit(uuid)) {
                 throw new InvalidCommandArgument(getMessage("error-mail-throttle"));
             }
 
+            // limit the count of users
+            var count = getDatabaseProvider().countEmail(mail);
+
+            if (count.compareTo(getConfiguration().get(ConfigurationKeys.MAIL_MAX_USERS)) >= 0) {
+                throw new InvalidCommandArgument(getMessage("error-mail-reach-maximum"));
+            }
+
+            // send email
             var token = GeneralUtil.generateAlphanumericText(16);
 
             sender.sendMessage(getMessage("info-mail-sending"));
